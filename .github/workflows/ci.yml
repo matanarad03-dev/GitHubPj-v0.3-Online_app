@@ -24,9 +24,9 @@ jobs:                                         # Container for all jobs in this w
 
       - name: Install dependencies              # Step label
         run: |
-          venv/Scripts/python.exe -m pip install --upgrade pip        # Upgrade pip inside the venv
-          venv/Scripts/python.exe -m pip install -r requirements.txt  # Install the app's runtime dependencies
-          venv/Scripts/python.exe -m pip install pytest httpx         # Install test-only dependencies
+          venv/bin/python -m pip install --upgrade pip        # Upgrade pip inside the venv
+          venv/bin/python -m pip install -r requirements.txt  # Install the app's runtime dependencies
+          venv/bin/python -m pip install pytest httpx         # Install test-only dependencies
 
       - name: Cache virtual environment for the test job   # Step label
         uses: actions/cache/save@v4                          # Saves a folder into the Actions cache
@@ -57,4 +57,4 @@ jobs:                                         # Container for all jobs in this w
 
       - name: Run tests                           # Step label
         working-directory: backend                # Run the next command from the backend/ folder
-        run: ../venv/Scripts/python.exe -m pytest -v   # Run the test suite using the venv's Python
+        run: ../venv/bin/python -m pytest -v        # Run the test suite using the venv's Python
