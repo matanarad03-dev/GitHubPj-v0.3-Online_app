@@ -20,22 +20,18 @@ jobs:                                         # Container for all jobs in this w
           python-version: "3.12"              # Python version used for the venv
 
       - name: Create virtual environment       # Step label
-        run: python -m venv venv               # Creates an isolated virtual environment in ./venv
+        # Built outside the git workspace (in $HOME) so actions/checkout's "git clean"
+        # in later jobs never deletes it — the same self-hosted machine runs every job.
+        run: python -m venv "$HOME/ci-venv/online-store"
 
       - name: Install dependencies              # Step label
         run: |
-          venv/bin/python -m pip install --upgrade pip        # Upgrade pip inside the venv
-          venv/bin/python -m pip install -r requirements.txt  # Install the app's runtime dependencies
-          venv/bin/python -m pip install pytest httpx         # Install test-only dependencies
+          VENV="$HOME/ci-venv/online-store"                       # Path to the persistent venv
+          $VENV/bin/python -m pip install --upgrade pip           # Upgrade pip inside the venv
+          $VENV/bin/python -m pip install -r requirements.txt     # Install the app's runtime dependencies
+          $VENV/bin/python -m pip install pytest httpx            # Install test-only dependencies
 
-      - name: Cache virtual environment for the test job   # Step label
-        uses: actions/cache/save@v4                          # Saves a folder into the Actions cache
-        with:
-          path: venv                                          # Folder to cache (the venv just built)
-          key: venv-${{ runner.os }}-${{ hashFiles('requirements.txt') }}-${{ github.run_id }}
-          # Cache key: unique per OS, per requirements.txt content, and per workflow run
-
-  test:                                        # Job 2: restore the venv and run the tests
+  test:                                        # Job 2: run the tests using the venv built in job 1
     name: Run basic tests                      # Friendly job name shown in the Actions UI
     runs-on: self-hosted                       # Use the same local self-hosted runner
     needs: install-dependencies                 # Wait for install-dependencies to finish first
@@ -43,21 +39,9 @@ jobs:                                         # Container for all jobs in this w
       - name: Checkout code                     # Step label
         uses: actions/checkout@v4               # Clones the repository onto the runner
 
-      - name: Set up Python                     # Step label
-        uses: actions/setup-python@v5           # Ensures the same Python version is available
-        with:
-          python-version: "3.12"                # Must match the version used to build the venv
-
-      - name: Restore virtual environment         # Step label
-        uses: actions/cache/restore@v4            # Restores the previously cached venv folder
-        with:
-          path: venv                              # Destination folder for the restored cache
-          key: venv-${{ runner.os }}-${{ hashFiles('requirements.txt') }}-${{ github.run_id }}
-          # Must match the exact key used when the cache was saved
-
       - name: Run tests                           # Step label
         working-directory: backend                # Run the next command from the backend/ folder
-        run: ../venv/bin/python -m pytest -v        # Run the test suite using the venv's Python
+        run: "$HOME/ci-venv/online-store/bin/python -m pytest -v"   # Run the tests with the persistent venv's Python
 
   deploy:                                       # Job 3: sync the code to a stable folder and restart the service
     name: Deploy to local server                # Friendly job name shown in the Actions UI
