@@ -66,7 +66,10 @@ jobs:                                         # Container for all jobs in this w
       - name: Install/update dependencies in the deploy folder   # Step label
         run: |
           cd "$HOME/apps/online-store"                                    # Move into the stable deploy folder
-          test -d venv || python -m venv venv                             # Create the venv only if it doesn't already exist
+          # Uses the system's own python3 (not actions/setup-python's build) because this venv
+          # keeps running as a systemd service long after this Actions job finishes, and the
+          # hosted build's shared libs are only reachable via env vars scoped to the CI job.
+          test -d venv || python3 -m venv venv                            # Create the venv only if it doesn't already exist
           venv/bin/python -m pip install --upgrade pip                    # Upgrade pip inside that venv
           venv/bin/python -m pip install -r requirements.txt              # Install/update the app's runtime dependencies
 
