@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store — Shop</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="customer.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="hero hero-compact">
+            <div>
+                <p class="eyebrow">Shop the latest picks</p>
+                <h1>Online Store</h1>
+                <p class="hero-copy">Browse products, add them to your cart, and check out in seconds.</p>
+            </div>
+            <a class="ghost-link" href="index.html">Admin Panel</a>
+        </header>
+
+        <main class="dashboard-grid">
+            <section id="product-list" class="panel panel-wide">
+                <div class="section-heading">
+                    <h2>Products</h2>
+                    <div class="inline-actions">
+                        <input type="text" id="filter-category" placeholder="Filter by category">
+                        <button onclick="filterByCategory()">Filter</button>
+                        <button onclick="loadProducts()">Clear Filter</button>
+                    </div>
+                </div>
+                <p id="message" class="message" role="status"></p>
+                <div id="products"></div>
+            </section>
+
+            <section id="cart" class="panel">
+                <h2>Shopping Cart</h2>
+                <div id="cart-items"><p class="muted">Cart is empty</p></div>
+                <button onclick="checkoutCart()">Checkout</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="customer.js"></script>
+</body>
+</html>

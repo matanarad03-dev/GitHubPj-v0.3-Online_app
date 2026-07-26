@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin">
+    <div class="page-shell">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">Inventory & storefront control</p>
+                <h1>Online Store Admin</h1>
+                <p class="hero-copy">Manage products, categories, and orders from one polished workspace.</p>
+            </div>
+            <a class="ghost-link" href="customer.html">Open customer view</a>
+        </header>
+
+        <main class="dashboard-grid">
+            <div class="left-column">
+                <section id="add-product" class="panel">
+                    <h2>Add Product</h2>
+                    <p class="field-help">Fill in the details below to create a new product entry.</p>
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="name">Product name</label>
+                            <input type="text" id="name" placeholder="Product name">
+                        </div>
+                        <div class="field-group">
+                            <label for="description">Description</label>
+                            <input type="text" id="description" placeholder="Description">
+                        </div>
+                        <div class="field-group">
+                            <label for="price">Price</label>
+                            <input type="number" id="price" placeholder="Price">
+                        </div>
+                        <div class="field-group">
+                            <label for="stock">Stock quantity</label>
+                            <input type="number" id="stock" placeholder="Stock quantity">
+                        </div>
+                        <div class="field-group">
+                            <label for="category-select">Category</label>
+                            <select id="category-select" onchange="document.getElementById('category').value = this.value"></select>
+                        </div>
+                        <input type="hidden" id="category">
+                    </div>
+                    <div class="inline-actions">
+                        <button onclick="addProduct()">Add Product</button>
+                    </div>
+                    <div class="inline-actions">
+                        <input type="text" id="filter-category" placeholder="Filter by category">
+                        <button onclick="filterByCategory()">Filter</button>
+                        <button onclick="loadProducts()">Clear Filter</button>
+                    </div>
+                    <div class="inline-actions">
+                        <button onclick="showLowStock()">Low Stock Alert</button>
+                        <button onclick="showInventoryValue()">Inventory Value</button>
+                    </div>
+                </section>
+
+                <section id="product-list" class="panel products-panel">
+                    <div class="section-heading">
+                        <h2>Products</h2>
+                        <div id="bulk-actions" class="inline-actions">
+                            <button onclick="bulkDelete()">Delete Selected</button>
+                            <button onclick="bulkAddToCart()">Add Selected to Cart</button>
+                        </div>
+                    </div>
+                    <div class="products-scroll">
+                        <div id="products"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="right-column">
+                <section id="message-panel" class="panel panel-message">
+                    <p id="message" class="message" role="status"></p>
+                </section>
+
+                <section id="cart" class="panel">
+                    <h2>Shopping Cart</h2>
+                    <div id="cart-items"><p class="muted">Cart is empty</p></div>
+                    <button onclick="checkoutCart()">Checkout</button>
+                </section>
+
+                <section id="category-management" class="panel">
+                    <h2>Manage Categories</h2>
+                    <div class="inline-actions">
+                        <input type="text" id="new-category" placeholder="New category name">
+                        <button onclick="addCategory()">Add Category</button>
+                    </div>
+                    <div id="category-list" class="category-list"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
