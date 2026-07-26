@@ -4,6 +4,9 @@ from fastapi import FastAPI, HTTPException
 # ייבוא ה-middleware שמאפשר לדפדפן לשלוח בקשות לשרת (CORS)
 from fastapi.middleware.cors import CORSMiddleware
 
+# Serves the static frontend files (HTML/CSS/JS) directly from FastAPI
+from fastapi.staticfiles import StaticFiles
+
 # ייבוא הכלים ליצירת מודל נתונים עם אילוצים
 from pydantic import BaseModel, Field
 
@@ -12,6 +15,9 @@ from typing import Optional
 
 # לקריאה וכתיבה של קובץ JSON
 import json
+
+# For resolving the frontend folder relative to this file
+import os
 
 # יצירת האפליקציה — זה האובייקט הראשי שמנהל את כל ה-API
 app = FastAPI()
@@ -23,6 +29,13 @@ app.add_middleware(
     allow_methods=["*"],   # מאפשר כל סוג בקשה: GET, POST, PUT, DELETE
     allow_headers=["*"],   # מאפשר כל header בבקשה
 )
+
+# Absolute path to the frontend folder, regardless of the working directory the app is started from
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend")
+
+# Serves index.html/customer.html/script.js/etc. under /app so the whole site
+# is reachable from a single host:port — e.g. http://<server-ip>:8000/app/customer.html
+app.mount("/app", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 
 
 # מודל המוצר — מגדיר איך נראה מוצר ומה מותר/אסור להכניס

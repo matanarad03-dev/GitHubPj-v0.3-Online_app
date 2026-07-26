@@ -1,5 +1,6 @@
-// Base URL of the backend server
-const API_URL = "http://127.0.0.1:8000";
+// Base URL of the backend server — empty string means "same host/port the page was loaded from",
+// so this works no matter which address (localhost, LAN IP, hostname) is used to reach the server
+const API_URL = "";
 
 // Shopping cart
 let cart = [];

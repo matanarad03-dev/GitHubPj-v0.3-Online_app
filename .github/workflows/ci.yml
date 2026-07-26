@@ -58,3 +58,34 @@ jobs:                                         # Container for all jobs in this w
       - name: Run tests                           # Step label
         working-directory: backend                # Run the next command from the backend/ folder
         run: ../venv/bin/python -m pytest -v        # Run the test suite using the venv's Python
+
+  deploy:                                       # Job 3: sync the code to a stable folder and restart the service
+    name: Deploy to local server                # Friendly job name shown in the Actions UI
+    runs-on: self-hosted                        # Runs on the same machine that hosts the running app
+    needs: test                                  # Only deploy if the tests job passed
+    if: github.ref == 'refs/heads/main'          # Only deploy on pushes to main, not on pull requests
+    steps:
+      - name: Checkout code                      # Step label
+        uses: actions/checkout@v4                # Clones the repository onto the runner
+
+      - name: Sync code to the stable deploy folder   # Step label
+        run: |
+          mkdir -p "$HOME/apps/online-store"                                       # Create the deploy folder if it doesn't exist yet
+          rsync -a --delete --exclude='.git' --exclude='venv' --exclude='backend/venv' \
+            ./ "$HOME/apps/online-store/"                                          # Copy the checked-out code there, removing anything stale
+
+      - name: Install/update dependencies in the deploy folder   # Step label
+        run: |
+          cd "$HOME/apps/online-store"                                    # Move into the stable deploy folder
+          test -d venv || python -m venv venv                             # Create the venv only if it doesn't already exist
+          venv/bin/python -m pip install --upgrade pip                    # Upgrade pip inside that venv
+          venv/bin/python -m pip install -r requirements.txt              # Install/update the app's runtime dependencies
+
+      - name: Install the systemd user service      # Step label
+        run: |
+          mkdir -p "$HOME/.config/systemd/user"                                    # Ensure the user-units folder exists
+          cp "$HOME/apps/online-store/deploy/online-store.service" \
+            "$HOME/.config/systemd/user/online-store.service"                      # Install/refresh the unit definition
+          systemctl --user daemon-reload                                           # Reload systemd so it sees any unit changes
+          systemctl --user enable online-store.service                             # Make sure the service starts on boot/linger
+          systemctl --user restart online-store.service                            # (Re)start the service with the latest code

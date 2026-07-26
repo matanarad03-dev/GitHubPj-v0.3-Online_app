@@ -1,0 +1,17 @@
+# systemd --user unit: keeps the Online Store API + frontend running in the background.
+# Installed once manually into ~/.config/systemd/user/, then updated automatically by the
+# "deploy" job in .github/workflows/ci.yml on every push to main.
+
+[Unit]
+Description=Online Store FastAPI app
+After=network.target
+
+[Service]
+# %h expands to the service user's home directory (systemd user-unit specifier)
+WorkingDirectory=%h/apps/online-store/backend
+ExecStart=%h/apps/online-store/venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
