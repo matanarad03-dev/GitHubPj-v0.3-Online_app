@@ -1,0 +1,60 @@
+name: CI                                     # Workflow name shown in the GitHub Actions tab
+
+on:                                           # Events that trigger this workflow
+  push:
+    branches: [main]                         # Run whenever commits are pushed to main
+  pull_request:
+    branches: [main]                         # Run whenever a pull request targets main
+
+jobs:                                         # Container for all jobs in this workflow
+  install-dependencies:                       # Job 1: build the venv and install dependencies
+    name: Install dependencies (venv)         # Friendly job name shown in the Actions UI
+    runs-on: self-hosted                      # Use a local self-hosted runner instead of a GitHub-hosted one
+    steps:
+      - name: Checkout code                   # Step label shown in the logs
+        uses: actions/checkout@v4             # Clones the repository onto the runner
+
+      - name: Set up Python                   # Step label
+        uses: actions/setup-python@v5         # Ensures the requested Python version is available
+        with:
+          python-version: "3.12"              # Python version used for the venv
+
+      - name: Create virtual environment       # Step label
+        run: python -m venv venv               # Creates an isolated virtual environment in ./venv
+
+      - name: Install dependencies              # Step label
+        run: |
+          venv/Scripts/python.exe -m pip install --upgrade pip        # Upgrade pip inside the venv
+          venv/Scripts/python.exe -m pip install -r requirements.txt  # Install the app's runtime dependencies
+          venv/Scripts/python.exe -m pip install pytest httpx         # Install test-only dependencies
+
+      - name: Cache virtual environment for the test job   # Step label
+        uses: actions/cache/save@v4                          # Saves a folder into the Actions cache
+        with:
+          path: venv                                          # Folder to cache (the venv just built)
+          key: venv-${{ runner.os }}-${{ hashFiles('requirements.txt') }}-${{ github.run_id }}
+          # Cache key: unique per OS, per requirements.txt content, and per workflow run
+
+  test:                                        # Job 2: restore the venv and run the tests
+    name: Run basic tests                      # Friendly job name shown in the Actions UI
+    runs-on: self-hosted                       # Use the same local self-hosted runner
+    needs: install-dependencies                 # Wait for install-dependencies to finish first
+    steps:
+      - name: Checkout code                     # Step label
+        uses: actions/checkout@v4               # Clones the repository onto the runner
+
+      - name: Set up Python                     # Step label
+        uses: actions/setup-python@v5           # Ensures the same Python version is available
+        with:
+          python-version: "3.12"                # Must match the version used to build the venv
+
+      - name: Restore virtual environment         # Step label
+        uses: actions/cache/restore@v4            # Restores the previously cached venv folder
+        with:
+          path: venv                              # Destination folder for the restored cache
+          key: venv-${{ runner.os }}-${{ hashFiles('requirements.txt') }}-${{ github.run_id }}
+          # Must match the exact key used when the cache was saved
+
+      - name: Run tests                           # Step label
+        working-directory: backend                # Run the next command from the backend/ folder
+        run: ../venv/Scripts/python.exe -m pytest -v   # Run the test suite using the venv's Python
