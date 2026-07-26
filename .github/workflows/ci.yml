@@ -39,6 +39,11 @@ jobs:                                         # Container for all jobs in this w
       - name: Checkout code                     # Step label
         uses: actions/checkout@v4               # Clones the repository onto the runner
 
+      - name: Set up Python                     # Step label
+        uses: actions/setup-python@v5           # Re-exports LD_LIBRARY_PATH etc. for this job so the venv's
+        with:                                    # python (linked against this exact build) can find its shared libs
+          python-version: "3.12"                # Must match the version used to build the venv
+
       - name: Run tests                           # Step label
         working-directory: backend                # Run the next command from the backend/ folder
         run: "$HOME/ci-venv/online-store/bin/python -m pytest -v"   # Run the tests with the persistent venv's Python
