@@ -69,7 +69,7 @@ jobs:                                         # Container for all jobs in this w
           # Uses the system's own python3 (not actions/setup-python's build) because this venv
           # keeps running as a systemd service long after this Actions job finishes, and the
           # hosted build's shared libs are only reachable via env vars scoped to the CI job.
-          test -d venv || python3 -m venv venv                            # Create the venv only if it doesn't already exist
+          test -x venv/bin/pip || { rm -rf venv && python3 -m venv venv; }  # (Re)create if missing or broken (e.g. no pip)
           venv/bin/python -m pip install --upgrade pip                    # Upgrade pip inside that venv
           venv/bin/python -m pip install -r requirements.txt              # Install/update the app's runtime dependencies
 
